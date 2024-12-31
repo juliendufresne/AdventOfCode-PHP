@@ -75,9 +75,11 @@ RUN <<EOF
 # Add [docker] to the prompt for developers to distinguish in what machine they are on their terminal
 sed -i "s/PS1='\${debian_chroot/PS1='\\\033[38;5;36m[docker]\\\033[39m \${debian_chroot/" /etc/bash.bashrc
 
-# install bash-completion
+# install bash-completion and make
 apt-get update
-apt-get -y --no-install-recommends install bash-completion
+apt-get -y --no-install-recommends install \
+    bash-completion \
+    make
 rm -rf /var/lib/apt/lists/*
 
 # enable bash-completion in bashrc
