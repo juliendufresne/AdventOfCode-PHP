@@ -68,9 +68,38 @@ RUN set -eux; \
 	;
 
 ## »»» juliendufresne/adventofcode —————————————————————————————————————————————————————————————————————————————————————
-SHELL ["/bin/bash", "-eux", "-c"]
+SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
+
+# hadolint ignore=DL3008
+RUN <<EOF
 # Add [docker] to the prompt for developers to distinguish in what machine they are on their terminal
-RUN sed -i "s/PS1='\${debian_chroot/PS1='\\\033[38;5;36m[docker]\\\033[39m \${debian_chroot/" /etc/bash.bashrc
+sed -i "s/PS1='\${debian_chroot/PS1='\\\033[38;5;36m[docker]\\\033[39m \${debian_chroot/" /etc/bash.bashrc
+
+# install bash-completion
+apt-get update
+apt-get -y --no-install-recommends install bash-completion
+rm -rf /var/lib/apt/lists/*
+
+# enable bash-completion in bashrc
+sed -i '/#if ! shopt -oq posix; then/,/^#fi/s/#//' /etc/bash.bashrc
+
+# enable bash completion for composer script
+composer completion bash | tee /etc/bash_completion.d/composer
+
+# enable bash completion for symfony console
+# Note: docker is not aware of our current code so we have to create a symfony
+#       project and extract the completion bash script from it, then remove the
+#       project
+tmp="$( mktemp -d )"
+composer create-project "symfony/skeleton ${SYMFONY_VERSION:-}" "$tmp" \
+         --stability="${STABILITY:-stable}" \
+         --prefer-dist \
+         --no-progress \
+         --no-interaction
+"$tmp/bin/console" completion bash | tee /etc/bash_completion.d/symfony_console
+rm -rf "$tmp"
+EOF
+
 ## ««« juliendufresne/adventofcode —————————————————————————————————————————————————————————————————————————————————————
 
 COPY --link frankenphp/conf.d/20-app.dev.ini $PHP_INI_DIR/app.conf.d/
