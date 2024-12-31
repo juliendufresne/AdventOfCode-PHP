@@ -63,8 +63,8 @@ ifeq ($(CONT_IS_RUNNING), 0)
 endif
 
 ifeq ($(IS_IN_DOCKER), 1)
-.PHONY: bash build debug down logs up sh start
-bash build debug down logs up sh start:
+.PHONY: bash build build-dev debug down logs up sh start
+bash build build-dev debug down logs up sh start:
 	@>&2 echo "\033[48;5;9;38;5;15m                     \033[49;39m"
 	@>&2 echo "\033[48;5;9;38;5;15m  You're in docker!  \033[49;39m"
 	@>&2 echo "\033[48;5;9;38;5;15m                     \033[49;39m"
@@ -82,6 +82,12 @@ build: ## Builds the Docker images
 	@echo "Running\033[38;5;2m $(DOCKER_COMP) build --pull --no-cache\033[39m..."
 	@echo ""
 	@$(DOCKER_COMP) build --pull --no-cache
+
+.PHONY: build-dev
+build-dev: ## Build the Docker images using docker's cache layers. Useful when you're working on the Dockerfile
+	@echo "Running\033[38;5;2m $(DOCKER_COMP) build\033[39m..."
+	@echo ""
+	@$(DOCKER_COMP) build
 
 .PHONY: up
 up: ## Start the docker hub in detached mode (no logs)
