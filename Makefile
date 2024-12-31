@@ -9,6 +9,26 @@
 # That's why every target display the executed command before running it.
 # ##
 
+XDEBUG_SERVER_NAME = symfony
+ifneq ($(wildcard ./.env),)
+    include .env
+    export
+endif
+ifneq ($(wildcard ./.env.local),)
+	include .env.local
+	export
+endif
+ifneq ($(APP_ENV),)
+	ifneq ($(wildcard ./.env.$(APP_ENV)),)
+		include .env.$(APP_ENV)
+		export
+	endif
+	ifneq ($(wildcard ./.env.$(APP_ENV).local),)
+		include .env.$(APP_ENV).local
+		export
+	endif
+endif
+
 CONT_IS_RUNNING = 1
 
 ifneq ("$(wildcard /.dockerenv)", "")
@@ -43,8 +63,8 @@ ifeq ($(CONT_IS_RUNNING), 0)
 endif
 
 ifeq ($(IS_IN_DOCKER), 1)
-.PHONY: bash build down logs up sh start
-bash build down logs up sh start:
+.PHONY: bash build debug down logs up sh start
+bash build debug down logs up sh start:
 	@>&2 echo "\033[48;5;9;38;5;15m                     \033[0m"
 	@>&2 echo "\033[48;5;9;38;5;15m  You're in docker!  \033[0m"
 	@>&2 echo "\033[48;5;9;38;5;15m                     \033[0m"
@@ -65,9 +85,30 @@ build: ## Builds the Docker images
 
 .PHONY: up
 up: ## Start the docker hub in detached mode (no logs)
+ifeq ($(CONT_IS_RUNNING), 1)
+up: down
+endif
 	@echo "Running\033[38;5;2m $(DOCKER_COMP) up --detach\033[39m..."
 	@echo ""
 	@$(DOCKER_COMP) up --detach --wait
+
+.PHONY: debug
+debug: ## Start the docker hub with debug in detached mode (no logs)
+ifeq ($(CONT_IS_RUNNING), 1)
+debug: down
+endif
+	@echo "Running\033[38;5;2m XDEBUG_MODE=debug $(DOCKER_COMP) up --detach\033[39m..."
+	@echo ""
+	@XDEBUG_MODE=debug $(DOCKER_COMP) up --detach --wait
+	@echo ""
+	@echo "\033[48;5;2;38;5;0m                                  \033[0m"
+	@echo "\033[48;5;2;38;5;0m  [OK] You're now in debug mode!  \033[0m"
+	@echo "\033[48;5;2;38;5;0m                                  \033[0m"
+	@echo ""
+	@echo "You may now run your command in debug mode inside docker with the following:"
+	@echo ""
+	@echo "\033[38;5;2m  XDEBUG_SESSION=1 PHP_IDE_CONFIG=\"serverName=$(XDEBUG_SERVER_NAME)\" php bin/console\033[39m"
+	@echo ""
 
 .PHONY: down
 down: ## Stop the docker hub
