@@ -67,6 +67,12 @@ RUN set -eux; \
 		xdebug \
 	;
 
+## »»» juliendufresne/adventofcode —————————————————————————————————————————————————————————————————————————————————————
+SHELL ["/bin/bash", "-eux", "-c"]
+# Add [docker] to the prompt for developers to distinguish in what machine they are on their terminal
+RUN sed -i "s/PS1='\${debian_chroot/PS1='\\\033[38;5;36m[docker]\\\033[39m \${debian_chroot/" /etc/bash.bashrc
+## ««« juliendufresne/adventofcode —————————————————————————————————————————————————————————————————————————————————————
+
 COPY --link frankenphp/conf.d/20-app.dev.ini $PHP_INI_DIR/app.conf.d/
 
 CMD [ "frankenphp", "run", "--config", "/etc/caddy/Caddyfile", "--watch" ]
