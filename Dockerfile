@@ -67,6 +67,14 @@ RUN set -eux; \
 	;
 
 ###> project specific ###
+# Ensure make is installed
+# hadolint ignore=DL3008
+RUN if ! command -v make; then \
+      apt-get update && apt-get install -y --no-install-recommends \
+      make \
+      && rm -rf /var/lib/apt/lists/*; \
+    fi
+
 # Add [docker] to the prompt for developers to distinguish in what machine they are on their terminal
 RUN set -eux; \
      sed -i "s/PS1='\${debian_chroot/PS1='\\\033[38;5;36m[docker]\\\033[39m \${debian_chroot/" /etc/bash.bashrc
