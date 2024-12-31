@@ -48,6 +48,9 @@ jobs:
         name: Run PHPUnit
         if: false # Remove this line if PHPUnit is installed
         run: docker compose exec -T php bin/phpunit
+      -
+        name: Composer dependencies security issues
+        run: docker compose exec -T php composer update --dry-run roave/security-advisories
   lint:
     name: Docker Lint
     runs-on: ubuntu-latest
