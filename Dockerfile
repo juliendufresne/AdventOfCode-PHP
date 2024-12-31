@@ -33,6 +33,11 @@ RUN set -eux; \
 		zip \
 	;
 
+## »»» juliendufresne/adventofcode —————————————————————————————————————————————————————————————————————————————————————
+# fix composer issue with git "detected dubious ownership in repository"
+RUN git config --global --add safe.directory /app
+## ««« juliendufresne/adventofcode —————————————————————————————————————————————————————————————————————————————————————
+
 # https://getcomposer.org/doc/03-cli.md#composer-allow-superuser
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
