@@ -32,6 +32,10 @@ RUN set -eux; \
 		opcache \
 		zip \
 	;
+###> project specific ###
+# fix composer issue with git "detected dubious ownership in repository"
+RUN git config --global --add safe.directory /app
+###< project specific ###
 
 # https://getcomposer.org/doc/03-cli.md#composer-allow-superuser
 ENV COMPOSER_ALLOW_SUPERUSER=1
