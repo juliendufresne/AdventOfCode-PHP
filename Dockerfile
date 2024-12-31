@@ -70,6 +70,31 @@ RUN set -eux; \
 # Add [docker] to the prompt for developers to distinguish in what machine they are on their terminal
 RUN set -eux; \
      sed -i "s/PS1='\${debian_chroot/PS1='\\\033[38;5;36m[docker]\\\033[39m \${debian_chroot/" /etc/bash.bashrc
+
+
+# enable completion on bash
+# hadolint ignore=DL3008
+RUN set -eux; \
+    apt-get update && apt-get install -y --no-install-recommends \
+    bash-completion \
+    && sed -i '/#if ! shopt -oq posix; then/,/^#fi/s/#//' /etc/bash.bashrc \
+    && rm -rf /var/lib/apt/lists/*
+
+# enable completion for composer script
+# hadolint ignore=DL4006
+RUN set -eux; \
+    composer completion bash | tee /etc/bash_completion.d/composer;
+
+# enable completion for symfony console
+# Note: docker is not aware of our current code so we have to create a symfony
+#       project and extract the completion bash script from it, then remove the
+#       project
+# hadolint ignore=DL4006
+RUN set -eux; \
+    tmp="$(mktemp -d)"; \
+    composer create-project "symfony/skeleton ${SYMFONY_VERSION:-}" "$tmp" --stability="${STABILITY:-stable}" --prefer-dist --no-progress --no-interaction; \
+    "$tmp/bin/console" completion bash | tee /etc/bash_completion.d/symfony_console; \
+    rm -rf "$tmp"
 ###< project specific ###
 
 COPY --link frankenphp/conf.d/20-app.dev.ini $PHP_INI_DIR/app.conf.d/
