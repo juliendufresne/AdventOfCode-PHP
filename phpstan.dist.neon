@@ -1,0 +1,23 @@
+parameters:
+    # used for cache. Useful for github action to reload a previous cache and speed up test
+    tmpDir: .github/cache/phpstan
+    level: 10
+    paths:
+        - bin/
+        - config/
+        - src/Kernel.php
+###> phpstan/phpstan-strict-rules
+    strictRules:
+        allRules: true
+###< phpstan/phpstan-strict-rules
+###> phpstan/phpstan-symfony
+    symfony:
+        containerXmlPath: var/cache/dev/App_KernelDevDebugContainer.xml
+    # If you're using PHP config files for Symfony 5.3+, you also need this for auto-loading of `Symfony\Config`:
+    scanDirectories:
+        - var/cache/dev/Symfony/Config
+    # If you're using PHP config files (including the ones under packages/*.php) for Symfony 5.3+,
+    # you need this to load the helper functions (i.e. service(), env()):
+    scanFiles:
+        - vendor/symfony/dependency-injection/Loader/Configurator/ContainerConfigurator.php
+###< phpstan/phpstan-symfony

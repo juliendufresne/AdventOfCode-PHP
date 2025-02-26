@@ -51,6 +51,27 @@ jobs:
       -
         name: Composer dependencies security issues
         run: docker compose exec -T php composer update --dry-run roave/security-advisories
+
+      -
+        name: Restore PHPStan result cache
+        uses: actions/cache/restore@v4
+        with:
+          path: .github/cache/phpstan # same as in phpstan.neon
+          key: "phpstan-result-cache-${{ github.run_id }}"
+          restore-keys: |
+              phpstan-result-cache-
+
+      -
+        name: Run PHPStan
+        run: docker compose exec -T php phpstan
+
+      -
+        name: Save PHPStan result cache
+        uses: actions/cache/save@v4
+        with:
+          path: .github/cache/phpstan # same as in phpstan.neon
+          key: "phpstan-result-cache-${{ github.run_id }}"
+
   lint:
     name: Docker Lint
     runs-on: ubuntu-latest

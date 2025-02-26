@@ -186,6 +186,17 @@ else
 	@composer update --prefer-dist --no-dev --no-interaction
 endif
 
+## —— Code Quality 🛠️ ——————————————————————————————————————————————————————————
+.PHONY: phpstan
+phpstan: -ensure-container-is-up ## finds bugs with static analysis tools
+ifeq ($(IS_IN_DOCKER), 0)
+	@$(PHP_CONT) make $@
+else
+	@echo "Running\033[38;5;2m phpstan\033[39m..."
+	@echo ""
+	@phpstan
+endif
+
 ## —— Symfony 🎵 ———————————————————————————————————————————————————————————————
 .PHONY: about
 about: -ensure-container-is-up ## Display information about the current project

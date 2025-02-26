@@ -70,10 +70,28 @@ RUN set -eux; \
 ## »»» juliendufresne/adventofcode —————————————————————————————————————————————————————————————————————————————————————
 SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
 
+ARG LIB_SRC_DIR=/usr/local/src
+
+# Add phpstan
+COPY --link frankenphp/phpstan $LIB_SRC_DIR/phpstan
+
 # hadolint ignore=DL3008
 RUN <<EOF
 # Add [docker] to the prompt for developers to distinguish in what machine they are on their terminal
 sed -i "s/PS1='\${debian_chroot/PS1='\\\033[38;5;36m[docker]\\\033[39m \${debian_chroot/" /etc/bash.bashrc
+
+# install phpstan
+composer update \
+         --quiet \
+         --no-interaction \
+         --working-dir=$LIB_SRC_DIR/phpstan \
+         --optimize-autoloader \
+         --classmap-authoritative \
+         --prefer-stable \
+         --with-all-dependencies \
+         --bump-after-update
+composer clear-cache
+ln -s $LIB_SRC_DIR/phpstan/vendor/bin/phpstan /usr/local/bin/phpstan
 
 # install bash-completion and make
 apt-get update
@@ -100,6 +118,9 @@ composer create-project "symfony/skeleton ${SYMFONY_VERSION:-}" "$tmp" \
          --no-interaction
 "$tmp/bin/console" completion bash | tee /etc/bash_completion.d/symfony_console
 rm -rf "$tmp"
+
+# enable bash completion for phpstan
+/usr/local/bin/phpstan completion bash | tee /etc/bash_completion.d/phpstan
 EOF
 
 ## ««« juliendufresne/adventofcode —————————————————————————————————————————————————————————————————————————————————————
